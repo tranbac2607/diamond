@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -6,80 +7,33 @@ import { useRouter } from 'next/router';
 import { Avatar, Dropdown, Menu, MenuProps, Typography } from 'antd';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthState } from '@/store/auth-slice';
+import { selectAuthState, setRenderHeaderInfo } from '@/store/auth-slice';
+import useToast from '@/hooks/use-toast';
 
-import {
-  ContactsOutlined,
-  HomeOutlined,
-  MoneyCollectOutlined,
-  SmileOutlined,
-  SolutionOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 
 import DiamondButton from '@/component/common/button';
 
 import logo from '~/assets/images/logo.jpg';
+import { ADVANCE_USER_KEY, LIST_ADVANCE_USER, LIST_MENU } from './header.constant';
+
 import './header.scss';
-import Link from 'next/link';
-
-const { Title } = Typography;
-type MenuItem = Required<MenuProps>['items'][number];
-
-const listMenu: MenuItem[] = [
-  {
-    label: 'Trang chủ',
-    key: '',
-    icon: <HomeOutlined />,
-  },
-  {
-    label: 'Giới thiệu',
-    key: 'introduce',
-    icon: <SolutionOutlined />,
-  },
-  {
-    label: 'Blogs',
-    key: 'blogs',
-    icon: <SmileOutlined />,
-  },
-  {
-    label: 'Dịch vụ',
-    key: 'service',
-    icon: <MoneyCollectOutlined />,
-  },
-  {
-    label: 'Liên hệ',
-    key: 'contact',
-    icon: <ContactsOutlined />,
-  },
-];
-
-const listAdvanceUser: MenuProps['items'] = [
-  {
-    key: '1',
-    label: 'Xem chi tiết tài khoản',
-  },
-  {
-    key: '2',
-    label: 'Đăng xuất',
-  },
-];
+import { logoutApi } from '@/services/auth';
+import { CODE_SUCCESS } from '@/constant/common';
 
 export const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { notify } = useToast();
+
   const authState = useSelector(selectAuthState);
 
   const [currentTab, setCurrentTab] = useState('mail');
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [customerName, setCustomerName] = useState('');
 
   useEffect(() => {
-    const user = localStorage.getItem('USER');
-    if (user) {
-      setUserInfo(JSON.parse(user));
-    } else {
-      setUserInfo(null);
-    }
+    const name = localStorage.getItem('CUSTOMER_NAME');
+    setCustomerName(name || '');
   }, [authState.renderHeaderInfo]);
 
   const handleClickMenuItem: MenuProps['onClick'] = (e) => {
@@ -91,8 +45,19 @@ export const Header = () => {
     router.push('/login');
   };
 
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    console.log(e.key);
+  const handleMenuClick: MenuProps['onClick'] = async (e) => {
+    if (e.key === ADVANCE_USER_KEY.LOGOUT) {
+      const res = await logoutApi();
+
+      if (res?.status === CODE_SUCCESS) {
+        notify('success', 'Đăng xuất thành công');
+        localStorage.clear();
+        router.push('/login');
+        dispatch(setRenderHeaderInfo(Date.now()));
+      } else {
+        notify('error', 'Something error!');
+      }
+    }
   };
 
   return (
@@ -107,19 +72,19 @@ export const Header = () => {
             onClick={handleClickMenuItem}
             selectedKeys={[currentTab]}
             mode='horizontal'
-            items={listMenu}
+            items={LIST_MENU}
             style={{ height: '46px', margin: '4px 0 0 40px' }}
           />
         </div>
         <div className='right-header-container'>
-          {Object.keys(userInfo ? userInfo : {}).length !== 0 ? (
+          {customerName ? (
             <Dropdown
-              menu={{ items: listAdvanceUser, onClick: handleMenuClick }}
+              menu={{ items: LIST_ADVANCE_USER, onClick: handleMenuClick }}
               placement='bottom'
             >
-              <Title style={{ cursor: 'pointer' }} level={3}>
-                Tran Van Bac <Avatar size={40} icon={<UserOutlined />} />
-              </Title>
+              <Typography.Title style={{ cursor: 'pointer' }} level={3}>
+                {customerName} <Avatar size={40} icon={<UserOutlined />} />
+              </Typography.Title>
             </Dropdown>
           ) : (
             <DiamondButton content='Đăng nhập' onClick={handleToLogin} />

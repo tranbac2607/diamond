@@ -11,13 +11,22 @@ export type LoginType = {
 };
 
 export type VerifyEmailRequest = {
-  email: string;
-  code: string;
+  confirmationCode: string;
 };
 
 export type VerifyEmailReponse = {
   email: string;
   code: string;
+};
+
+export type ForgotPasswordRequest = {
+  email: string;
+};
+
+export type ResetPasswordRequest = {
+  resetCode: string;
+  newPassword: string;
+  confirmPassword: string;
 };
 
 export type UserInfoUser = {
