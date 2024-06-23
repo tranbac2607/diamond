@@ -73,7 +73,7 @@ export const Header = () => {
             selectedKeys={[currentTab]}
             mode='horizontal'
             items={LIST_MENU}
-            style={{ height: '46px', margin: '4px 0 0 40px' }}
+            style={{ height: '46px', margin: '4px 0 0 40px', minWidth: '550px' }}
           />
         </div>
         <div className='right-header-container'>
