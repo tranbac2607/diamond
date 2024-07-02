@@ -6,12 +6,16 @@ import { HistoryRequestCustomer } from './history-request.model';
 import DiamondButton from '../common/button';
 import { SETTING_SCROLL_TABLE } from '../home/home.constant';
 import Loading from '../common/loading/loading';
-import { getListBookingCustomerApi } from '@/services/account';
+import { downloadCertificateApi, getListBookingCustomerApi } from '@/services/account';
 import { CODE_SUCCESS } from '@/constant/common';
 import { transformServiceBooking } from './history-request.utils';
 import PaymentDialog from '../services/components/payment-dialog';
 
-const WAIT_TO_PAY = 'Chờ thanh toán';
+const STATUS = {
+  WAIT_TO_PAY: 'Chờ thanh toán',
+  PAYMENTED: 'Đã thanh toán',
+  ACCREDITATION: 'Kiểm định thành công',
+};
 
 const HistoryRequest = () => {
   const { customerId } = useGetAccountInfo();
@@ -28,6 +32,23 @@ const HistoryRequest = () => {
     setRequestId(rowData.requestId);
     setServiceId(rowData.serviceId);
     setIsOpenPaymentDialog(true);
+  };
+
+  const handleDownLoadCertificate = async (requestId: number) => {
+    setIsLoading(true);
+    const res = await downloadCertificateApi(requestId);
+    if (res?.status === CODE_SUCCESS) {
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(new Blob([res.data], { type: 'PDF' }));
+      link.download = decodeURI('test');
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return true;
+    }
+
+    setIsLoading(false);
   };
 
   const historyColumns: TableProps<HistoryRequestCustomer>['columns'] = [
@@ -61,9 +82,10 @@ const HistoryRequest = () => {
     {
       title: 'Action',
       key: '',
+      width: 360,
       render: (_, rowData) => (
-        <>
-          {rowData.status === WAIT_TO_PAY ? (
+        <div className='d-flex gap-2 align-items-center'>
+          {rowData.status === STATUS.WAIT_TO_PAY ? (
             <Space size='middle'>
               <DiamondButton
                 content='Thanh toán ngay'
@@ -73,7 +95,13 @@ const HistoryRequest = () => {
           ) : (
             <>Bạn đã thanh toán</>
           )}
-        </>
+          {rowData.status === STATUS.ACCREDITATION && (
+            <DiamondButton
+              content='Lấy giấy chứng nhận'
+              onClick={() => handleDownLoadCertificate(rowData.requestId)}
+            />
+          )}
+        </div>
       ),
     },
   ];
@@ -87,7 +115,10 @@ const HistoryRequest = () => {
         phoneNumber: item.phoneNumber,
         address: item.address,
         serviceId: item.serviceId,
-        status: item.status,
+        status:
+          item.status === STATUS.PAYMENTED
+            ? 'Đã thanh toán, nhân viên đang đến lấy kim cương'
+            : item.status,
         requestId: item.requestId,
       }));
       setDataSource(dataSoureRevert);

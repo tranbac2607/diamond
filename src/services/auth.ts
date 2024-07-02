@@ -3,7 +3,6 @@ import {
   LoginType,
   RegisterType,
   ResetPasswordRequest,
-  VerifyEmailReponse,
   VerifyEmailRequest,
 } from '@/models/auth';
 import api from '../api';

@@ -1,7 +1,6 @@
-import { Space, TableProps } from 'antd';
+import { TableProps } from 'antd';
 
 import CustomTable from '../../custom-table/custom-table';
-import DiamondButton from '@/component/common/button';
 import { Customer } from '@/models/account';
 
 type Props = {

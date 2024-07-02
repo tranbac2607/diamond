@@ -80,6 +80,17 @@ export const getListBookingCustomerApi = async (id: number) => {
   }
 };
 
+export const downloadCertificateApi = async (requestId: number) => {
+  try {
+    const res = await api.get(`api/Certificate/generate-certificate-pdf-by-request/${requestId}`, {
+      responseType: 'blob',
+    });
+    return res;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const getListResultApi = async () => {
   try {
     const res = await api.get('api/ListAllResult/list-results');
