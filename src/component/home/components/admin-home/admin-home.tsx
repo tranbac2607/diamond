@@ -1,67 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Space, TableProps, Tabs, TabsProps } from 'antd';
-
-import useToast from '@/hooks/use-toast';
+import { Tabs, TabsProps } from 'antd';
 
 import { CODE_SUCCESS } from '@/constant/common';
-import { getListCustomersApi, getListEmployeeApi, getListResultApi } from '@/services/account';
+import { getListEmployeeApi, getListResultApi } from '@/services/account';
 import Loading from '@/component/common/loading/loading';
+import { Employee } from '@/models/account';
 
-import DiamondButton from '@/component/common/button';
-import { Customer, Employee } from '@/models/account';
-import CustomTable from '../custom-table/custom-table';
 import { TAB_ADMIN_KEY } from '../../home.constant';
 import { transformListResultData } from '../staff-home/staff-home.utils';
 import { ListResult } from '../staff-home/staff-home.model';
 import ListResultTable from '../staff-home/components/list-result';
+import ListEmployee from './components/list-employee';
 
 const AdminHome = () => {
-  const { notify } = useToast();
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [listCustomers, setListCustomers] = useState<Customer[]>([]);
   const [listEmployees, setListEmployees] = useState<Employee[]>([]);
   const [listResult, setListResult] = useState<ListResult[]>([]);
   const [loadListResultKey, setLoadListResultKey] = useState(0);
-
-  const employeeColumns: TableProps<Employee>['columns'] = [
-    {
-      title: 'Id',
-      dataIndex: 'employeeId',
-      key: 'employeeId',
-      width: 100,
-    },
-    {
-      title: 'Tên nhân viên',
-      dataIndex: 'employeeName',
-      key: 'employeeName',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Số điện thoại',
-      dataIndex: 'phone',
-      key: 'phone',
-    },
-    {
-      title: 'Địa chỉ',
-      dataIndex: 'address',
-      key: 'address',
-    },
-    {
-      title: 'Action',
-      key: '',
-      render: (_, record) => (
-        <Space size='middle'>
-          <DiamondButton danger content='Xóa' />
-        </Space>
-      ),
-    },
-  ];
+  const [loadDataEmployeeKey, setLoadDataEmployeeKey] = useState(0);
 
   const getListResult = async () => {
     setIsLoading(true);
@@ -73,21 +30,18 @@ const AdminHome = () => {
     setIsLoading(false);
   };
 
+  const getListEmployee = async () => {
+    setIsLoading(true);
+    const res = await getListEmployeeApi();
+    if (res?.status === CODE_SUCCESS) {
+      setListEmployees(res.data);
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const getListCustomers = async () => {
-      setIsLoading(true);
-      await Promise.all([getListCustomersApi(), getListEmployeeApi()])
-        .then((res) => {
-          setListCustomers(res[0]?.data);
-          setListEmployees(res[1]?.data);
-        })
-        .catch(() => {
-          notify('error', 'Something error!');
-        });
-      setIsLoading(false);
-    };
-    getListCustomers();
-  }, []);
+    getListEmployee();
+  }, [loadDataEmployeeKey]);
 
   useEffect(() => {
     getListResult();
@@ -97,7 +51,9 @@ const AdminHome = () => {
     {
       key: TAB_ADMIN_KEY.EMPLOYEES,
       label: 'Danh sách nhân viên',
-      children: <CustomTable columns={employeeColumns} dataSource={listEmployees} />,
+      children: (
+        <ListEmployee dataSource={listEmployees} setLoadDataEmployeeKey={setLoadDataEmployeeKey} />
+      ),
     },
     {
       key: TAB_ADMIN_KEY.REQUEST_ORDER,

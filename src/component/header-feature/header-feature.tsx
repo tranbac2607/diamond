@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 
 import { Avatar, Dropdown, Menu, MenuProps, Typography } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthState, setAccountRole, setRenderHeaderInfo } from '@/store/auth-slice';
+
+import { useRouter } from 'next/router';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
+import { selectAuthState, setRenderHeaderInfo } from '@/store/auth-slice';
 import useToast from '@/hooks/use-toast';
 
 import {
@@ -33,6 +34,7 @@ const HeaderFeature = () => {
   const dispatch = useDispatch();
   const { notify } = useToast();
   const pathname = usePathname();
+  const { customerName: name, role } = useGetAccountInfo();
 
   const authState = useSelector(selectAuthState);
 
@@ -47,9 +49,8 @@ const HeaderFeature = () => {
   }, [pathname]);
 
   useEffect(() => {
-    const name = localStorage.getItem('CUSTOMER_NAME');
     setCustomerName(name || '');
-  }, [authState.renderHeaderInfo]);
+  }, [authState.renderHeaderInfo, name]);
 
   const handleClickMenuItem: MenuProps['onClick'] = (e) => {
     setCurrentTab(e.key);
@@ -85,8 +86,7 @@ const HeaderFeature = () => {
               <Image src={logo} alt='logo' width={60} height={60} />
             </Link>
 
-            {authState.accountRole === ACCOUNT_ROLE.ADMIN ||
-            authState.accountRole === ACCOUNT_ROLE.STAFF ? (
+            {role === ACCOUNT_ROLE.ADMIN || role === ACCOUNT_ROLE.STAFF ? (
               <></>
             ) : (
               <Menu
@@ -99,10 +99,10 @@ const HeaderFeature = () => {
             )}
           </div>
           <div className='right-header-container'>
-            {authState.accountRole ? (
+            {role ? (
               <Dropdown
                 menu={{
-                  items: [ACCOUNT_ROLE.ADMIN, ACCOUNT_ROLE.STAFF].includes(authState.accountRole)
+                  items: [ACCOUNT_ROLE.ADMIN, ACCOUNT_ROLE.STAFF].includes(role)
                     ? ADMIN_ADVANCE_USER
                     : LIST_ADVANCE_USER,
                   onClick: handleMenuClick,
@@ -110,9 +110,9 @@ const HeaderFeature = () => {
                 placement='bottom'
               >
                 <Typography.Title style={{ cursor: 'pointer' }} level={3}>
-                  {authState.accountRole === ACCOUNT_ROLE.ADMIN
+                  {role === ACCOUNT_ROLE.ADMIN
                     ? 'Admin'
-                    : authState.accountRole === ACCOUNT_ROLE.STAFF
+                    : role === ACCOUNT_ROLE.STAFF
                     ? 'Nhân viên'
                     : customerName}{' '}
                   <Avatar size={40} icon={<UserOutlined />} />

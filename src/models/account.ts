@@ -2,6 +2,7 @@ export type Employee = {
   employeeId: number;
   employeeName: string;
   email: string;
+  password: string;
   phone: string;
   role: number;
   status: true;
@@ -67,4 +68,12 @@ export type CreateResultRequest = {
   polish: string;
   symmetry: string;
   fluorescence: string;
+};
+
+export type CreateEmployeeRequest = {
+  employeeId?: number;
+  employeeName: string;
+  email: string;
+  password?: string;
+  phone: string;
 };

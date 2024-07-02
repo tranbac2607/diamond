@@ -2,6 +2,7 @@ import {
   AccountDetailRequest,
   BookingServicesRequest,
   ChangePasswordAccountRequest,
+  CreateEmployeeRequest,
   PaymentDoneRequest,
 } from '@/models/account';
 import api from '../api';
@@ -91,6 +92,33 @@ export const getListResultApi = async () => {
 export const acceptResultApi = async (requestId: number) => {
   try {
     const res = await api.put(`api/ListAllResult/update-request-status/${requestId}`);
+    return res;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const createEmployeeApi = async (payload: CreateEmployeeRequest) => {
+  try {
+    const res = await api.post('api/Account/create-employee', { ...payload });
+    return res;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const updateEmployeeApi = async (payload: CreateEmployeeRequest) => {
+  try {
+    const res = await api.put(`api/Account/update-employee/${payload.employeeId}`, { ...payload });
+    return res;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const deleteEmployeeApi = async (employeeId: number) => {
+  try {
+    const res = await api.delete(`api/Account/delete-employee/${employeeId}`);
     return res;
   } catch (error) {
     return undefined;

@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Form, Formik, FormikProps } from 'formik';
 
 import useToast from '@/hooks/use-toast';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
 
 import { ID_CARD_REG_EXP, PHONE_REG_EXP } from '@/constant/auth';
 import { BookingServicesRequest } from '@/models/account';
@@ -30,6 +31,7 @@ const INIT_VALUES: BookingServicesRequest = {
 
 const BookingServiceModal = ({ isOpenBookServiceModal, setIsOpenBookServiceModal }: Props) => {
   const { notify } = useToast();
+  const { customerId } = useGetAccountInfo();
 
   const validate = Yup.object({
     phoneNumber: Yup.string()
@@ -63,10 +65,9 @@ const BookingServiceModal = ({ isOpenBookServiceModal, setIsOpenBookServiceModal
   };
 
   const handleSubmitForm = async (values: BookingServicesRequest) => {
-    const customerId = localStorage.getItem('CUSTOMER_ID');
     setIsLoading(true);
     setIsOpenBookServiceModal(false);
-    const res = await bookingServiceApi({ ...values, customerId: Number(customerId) || 0 });
+    const res = await bookingServiceApi({ ...values, customerId });
 
     if (res?.status === CODE_SUCCESS_2) {
       notify('success', 'Đặt lịch thành công, bạn vui lòng thanh toán!');

@@ -5,6 +5,7 @@ import { Modal, Skeleton } from 'antd';
 import * as Yup from 'yup';
 import { Form, Formik, FormikProps } from 'formik';
 import useToast from '@/hooks/use-toast';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
 
 import { EMAIL_REG_EXP, PHONE_REG_EXP } from '@/constant/auth';
 import { CODE_SUCCESS } from '@/constant/common';
@@ -33,6 +34,7 @@ type Props = {
 const DetailAccountModal = ({ isOpenDetailAccount, setIsOpenDetailAccount }: Props) => {
   const dispatch = useDispatch();
   const { notify } = useToast();
+  const { customerId } = useGetAccountInfo();
 
   const validate = Yup.object({
     customerName: Yup.string()
@@ -53,7 +55,6 @@ const DetailAccountModal = ({ isOpenDetailAccount, setIsOpenDetailAccount }: Pro
   const [isOpenChangePasswordModal, setIsOpenChangePasswordModal] = useState<boolean>(false);
 
   const getDetailAccount = async () => {
-    const customerId = localStorage.getItem('CUSTOMER_ID');
     if (customerId) {
       setIsLoading(true);
       const res = await getDetailAccountCustomerApi(Number(customerId));
@@ -119,7 +120,7 @@ const DetailAccountModal = ({ isOpenDetailAccount, setIsOpenDetailAccount }: Pro
                     disabled={!isEdit}
                     content='Cập nhật'
                     htmlType='submit'
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                   />
                 </>
               )}

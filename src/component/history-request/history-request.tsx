@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Space, Table, TableProps } from 'antd';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
 
 import { HistoryRequestCustomer } from './history-request.model';
 import DiamondButton from '../common/button';
@@ -13,6 +14,8 @@ import PaymentDialog from '../services/components/payment-dialog';
 const WAIT_TO_PAY = 'Chờ thanh toán';
 
 const HistoryRequest = () => {
+  const { customerId } = useGetAccountInfo();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<HistoryRequestCustomer[]>([]);
 
@@ -76,9 +79,8 @@ const HistoryRequest = () => {
   ];
 
   const getData = async () => {
-    const customerId = localStorage.getItem('CUSTOMER_ID');
     setIsLoading(true);
-    const res = await getListBookingCustomerApi(Number(customerId) || 0);
+    const res = await getListBookingCustomerApi(customerId);
     if (res?.status === CODE_SUCCESS) {
       const dataSoureRevert = res.data.map((item: any, index: number) => ({
         id: index + 1,
@@ -95,8 +97,8 @@ const HistoryRequest = () => {
   };
 
   useEffect(() => {
-    getData();
-  }, [loadDataKey]);
+    customerId && getData();
+  }, [loadDataKey, customerId]);
 
   return (
     <>

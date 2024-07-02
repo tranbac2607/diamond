@@ -1,13 +1,16 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Popconfirm, Space, TableProps } from 'antd';
 
+import useToast from '@/hooks/use-toast';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
+
+import DiamondButton from '@/component/common/button';
+import Loading from '@/component/common/loading/loading';
+import { CODE_SUCCESS } from '@/constant/common';
+
 import CustomTable from '../../custom-table/custom-table';
 import { ListRequest } from '../staff-home.model';
-import DiamondButton from '@/component/common/button';
 import { updateStatusWhenReceivedDiamondApi } from '@/services/staff';
-import Loading from '@/component/common/loading/loading';
-import useToast from '@/hooks/use-toast';
-import { CODE_SUCCESS } from '@/constant/common';
 import CreateResultModal from './create-result';
 
 type Props = {
@@ -24,6 +27,7 @@ const ListRequestTable = ({
   setLoadDataRequestAcceptedKey,
 }: Props) => {
   const { notify } = useToast();
+  const { employeeId } = useGetAccountInfo();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenCreateResultModal, setIsOpenCreateResultModal] = useState<boolean>(false);
@@ -31,7 +35,7 @@ const ListRequestTable = ({
 
   const handleAcceptRequest = async (requestId: number) => {
     setIsLoading(true);
-    const res = await updateStatusWhenReceivedDiamondApi(requestId);
+    const res = await updateStatusWhenReceivedDiamondApi(requestId, employeeId);
 
     if (res?.status === CODE_SUCCESS) {
       notify('success', 'Xác nhận thành công!');

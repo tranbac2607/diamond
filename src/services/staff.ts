@@ -19,9 +19,11 @@ export const getListRequestAcceptedApi = async () => {
   }
 };
 
-export const updateStatusWhenReceivedDiamondApi = async (requestId: number) => {
+export const updateStatusWhenReceivedDiamondApi = async (requestId: number, employeeId: number) => {
   try {
-    const res = await api.put(`api/AcceptStatus/Update-status-when-received-diamond/${requestId}`);
+    const res = await api.put(
+      `api/AcceptStatus/Update-status-when-received-diamond/${requestId}${employeeId}`
+    );
     return res;
   } catch (error) {
     return undefined;

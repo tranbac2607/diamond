@@ -1,6 +1,8 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Image, Modal, Typography } from 'antd';
+
 import useToast from '@/hooks/use-toast';
+import useGetAccountInfo from '@/hooks/use-get-account-info';
 
 import {
   transformCost,
@@ -26,14 +28,14 @@ const PaymentDialog = ({
   setLoadDataKey,
 }: Props) => {
   const { notify } = useToast();
+  const { customerId } = useGetAccountInfo();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handlePaymentDone = async () => {
-    const customerId = localStorage.getItem('CUSTOMER_ID');
     setIsLoading(true);
     setIsOpenPaymentDialog(false);
-    const res = await paymentDoneApi({ requestId, customerId: Number(customerId) || 0 });
+    const res = await paymentDoneApi({ requestId, customerId });
 
     if (res?.status === CODE_SUCCESS) {
       notify('success', 'Thanh toán thành công!');
